@@ -8,7 +8,7 @@ from PIL import Image
 import mediapipe as mp
 
 from huggingface_hub import login
-login("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")  # 토큰 직접 입력
+login("token")  # 토큰 직접 입력
 
 
 controlnet = ControlNetModel.from_pretrained(
