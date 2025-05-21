@@ -7,7 +7,9 @@ import cv2
 from PIL import Image
 from huggingface_hub import login
 import mediapipe as mp
-login("token")  # 토큰 직접 입력
+import pathlib
+
+login("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")  # 토큰 직접 입력
 
 
 def detect_and_crop_face_region(image_path):
@@ -39,7 +41,7 @@ def generate_canny_map(image):
 
 
 # initialize the models and pipeline
-controlnet_conditioning_scale = 0.5  # recommended for good generalization
+controlnet_conditioning_scale = 1.0  # recommended for good generalization
 controlnet = ControlNetModel.from_pretrained(
     "diffusers/controlnet-canny-sdxl-1.0", torch_dtype=torch.float16
 )
@@ -47,13 +49,15 @@ vae = AutoencoderKL.from_pretrained("madebyollin/sdxl-vae-fp16-fix", torch_dtype
 pipe = StableDiffusionXLControlNetPipeline.from_pretrained(
     "stabilityai/stable-diffusion-xl-base-1.0", controlnet=controlnet, vae=vae, torch_dtype=torch.float16
 )
-pipe.enable_model_cpu_offload()
+
+pipe = pipe.to('cuda')
+# pipe.enable_xformers_memory_efficient_attention()
 
 # get canny image
-prompt = "food"
+prompt = "blueberry muffin"
 
-img_path = "./train/canny/0.jpg"
-face_crop = detect_and_crop_face_region(img_path)
+img_path = "C:/Users/X423/Downloads/genAI/genAI/train/canny/flickr_cat_000002.jpg"
+face_crop = detect_and_crop_face_region(pathlib.Path(img_path))
 canny_map = generate_canny_map(face_crop)
 control_image = Image.fromarray(canny_map)
 

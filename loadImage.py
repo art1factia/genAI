@@ -1,6 +1,7 @@
 import kagglehub
 import os
 import shutil
+import pathlib
 
 # Download latest version
 foodPath = kagglehub.dataset_download("trolukovich/food11-image-dataset")
@@ -10,10 +11,10 @@ animalPath = kagglehub.dataset_download("andrewmvd/animal-faces")
 print("Path to food dataset files:", foodPath)
 print("Path to animal dataset files:", animalPath)
 
-target_food_dir = "/Users/ihyeonseo/Desktop/2025/GenAI/train/canny"
-target_animal_dir = "/Users/ihyeonseo/Desktop/2025/GenAI/train/target"
-os.makedirs(target_food_dir, exist_ok=True)
-os.makedirs(target_animal_dir, exist_ok=True)
+target_food_dir = "C:/Users/X423/Downloads/genAI/genAI/train/target"
+target_animal_dir = "C:/Users/X423/Downloads/genAI/genAI/train/canny"
+os.makedirs(pathlib.Path(target_food_dir), exist_ok=True)
+os.makedirs(pathlib.Path(target_animal_dir), exist_ok=True)
 
 for root, _, files in os.walk(foodPath):
     for file in files:
