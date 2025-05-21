@@ -1,5 +1,6 @@
 # !pip install opencv-python transformers accelerate
-from diffusers import StableDiffusionXLControlNetPipeline, ControlNetModel, AutoencoderKL
+from diffusers import StableDiffusionXLControlNetPipeline, ControlNetModel, AutoencoderKL,SD3ControlNetModel
+from diffusers.image_processor import VaeImageProcessor
 from diffusers.utils import load_image
 import numpy as np
 import torch
@@ -11,33 +12,30 @@ import pathlib
 
 login("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")  # 토큰 직접 입력
 
+class SD3CannyImageProcessor(VaeImageProcessor):
+    def __init__(self):
+        super().__init__(do_normalize=False)
+    def preprocess(self, image, **kwargs):
+        image = super().preprocess(image, **kwargs)
+        image = image * 255 * 0.5 + 0.5
+        return image
+    def postprocess(self, image, do_denormalize=True, **kwargs):
+        do_denormalize = [True] * image.shape[0]
+        image = super().postprocess(image, **kwargs, do_denormalize=do_denormalize)
+        return image
 
-def detect_and_crop_face_region(image_path):
-    img = cv2.imread(image_path)
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+def load_image_from_pil(pil_image):
+  image_np = np.array(pil_image)
+  if image_np.ndim == 3 and image_np.shape[2] == 3:
+      gray = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+  else:
+      gray = image_np
+  edges = cv2.Canny(gray, 200, 400)
+  edge_image = Image.fromarray(edges, mode='L')
+  edge_image.save('canny.png')
+  return edge_image.convert("RGB")
 
-    mp_face = mp.solutions.face_mesh
-    face_mesh = mp_face.FaceMesh(static_image_mode=True)
-
-    results = face_mesh.process(img_rgb)
-    h, w, _ = img.shape
-
-    if results.multi_face_landmarks:
-        landmarks = results.multi_face_landmarks[0].landmark
-        xs = [int(l.x * w) for l in landmarks]
-        ys = [int(l.y * h) for l in landmarks]
-        x_min, x_max = max(0, min(xs)), min(w, max(xs))
-        y_min, y_max = max(0, min(ys)), min(h, max(ys))
-        cropped = img[y_min:y_max, x_min:x_max]
-        return cropped
-    return img  # fallback
-
-def generate_canny_map(image):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    canny = cv2.Canny(gray, 100, 200)
-    canny_rgb = cv2.cvtColor(canny, cv2.COLOR_GRAY2RGB)
-    return canny_rgb
-
+imgProcesser = SD3CannyImageProcessor()
 
 
 # initialize the models and pipeline
@@ -52,14 +50,13 @@ pipe = StableDiffusionXLControlNetPipeline.from_pretrained(
 
 pipe = pipe.to('cuda')
 # pipe.enable_xformers_memory_efficient_attention()
-
+pipe.image_processor = imgProcesser
 # get canny image
 prompt = "blueberry muffin"
 
 img_path = "C:/Users/X423/Downloads/genAI/genAI/train/canny/flickr_cat_000002.jpg"
-face_crop = detect_and_crop_face_region(pathlib.Path(img_path))
-canny_map = generate_canny_map(face_crop)
-control_image = Image.fromarray(canny_map)
+control_image = load_image_from_pil(Image.open(img_path))
+
 
 # generate image
 generated = pipe(prompt, image=control_image, num_inference_steps=30).images[0]
