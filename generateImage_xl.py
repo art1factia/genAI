@@ -39,7 +39,6 @@ imgProcesser = SD3CannyImageProcessor()
 
 
 # initialize the models and pipeline
-controlnet_conditioning_scale = 1.0  # recommended for good generalization
 controlnet = ControlNetModel.from_pretrained(
     "diffusers/controlnet-canny-sdxl-1.0", torch_dtype=torch.float16
 )
@@ -52,12 +51,12 @@ pipe = pipe.to('cuda')
 # pipe.enable_xformers_memory_efficient_attention()
 pipe.image_processor = imgProcesser
 # get canny image
-prompt = "blueberry muffin"
+prompt = "realistic blueberry muffin"
 
-img_path = "C:/Users/X423/Downloads/genAI/genAI/train/canny/flickr_cat_000002.jpg"
+img_path = "C:/Users/X423/Downloads/genAI/genAI/train/canny/cat.jpg"
 control_image = load_image_from_pil(Image.open(pathlib.Path(img_path)))
 
 
 # generate image
-generated = pipe(prompt, image=control_image, num_inference_steps=30).images[0]
+generated = pipe(prompt, image=control_image, controlnet_conditioning_scale=0.3, guidance_scale=7.5, num_inference_steps=30).images[0]
 generated.save("food_result.png")
