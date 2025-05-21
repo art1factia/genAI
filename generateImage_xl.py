@@ -55,7 +55,7 @@ pipe.image_processor = imgProcesser
 prompt = "blueberry muffin"
 
 img_path = "C:/Users/X423/Downloads/genAI/genAI/train/canny/flickr_cat_000002.jpg"
-control_image = load_image_from_pil(Image.open(img_path))
+control_image = load_image_from_pil(Image.open(pathlib.Path(img_path)))
 
 
 # generate image
