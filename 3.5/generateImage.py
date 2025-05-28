@@ -6,9 +6,16 @@ import cv2
 import numpy as np
 from PIL import Image
 import mediapipe as mp
-
+from dotenv import load_dotenv
 from huggingface_hub import login
-login("token")  # 토큰 직접 입력
+import os
+# load .env
+load_dotenv()
+
+token = os.environ.get('token')
+
+
+login(token)  # 토큰 직접 입력
 
 
 controlnet = ControlNetModel.from_pretrained(

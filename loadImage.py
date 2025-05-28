@@ -11,8 +11,8 @@ animalPath = kagglehub.dataset_download("andrewmvd/animal-faces")
 print("Path to food dataset files:", foodPath)
 print("Path to animal dataset files:", animalPath)
 
-target_food_dir = "C:/Users/X423/Downloads/genAI/genAI/train/target"
-target_animal_dir = "C:/Users/X423/Downloads/genAI/genAI/train/canny"
+target_food_dir = "./train/target"
+target_animal_dir = "./train/animal"
 os.makedirs(pathlib.Path(target_food_dir), exist_ok=True)
 os.makedirs(pathlib.Path(target_animal_dir), exist_ok=True)
 

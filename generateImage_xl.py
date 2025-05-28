@@ -9,8 +9,16 @@ from PIL import Image
 from huggingface_hub import login
 import mediapipe as mp
 import pathlib
+from dotenv import load_dotenv
+from huggingface_hub import login
+import os
+# load .env
+load_dotenv()
 
-login("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")  # 토큰 직접 입력
+token = os.environ.get('token')
+
+
+login(token)  # 토큰 직접 입력
 
 class SD3CannyImageProcessor(VaeImageProcessor):
     def __init__(self):
